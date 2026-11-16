@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"><title>Panel RAT</title>
+<style>
+  body{background:#0d1117;color:#c9d1d9;font-family:Consolas,monospace;padding:20px}
+  h1{color:#58a6ff}
+  .msg{background:#161b22;border-left:3px solid #58a6ff;padding:10px;margin:10px 0;border-radius:6px;white-space:pre-wrap}
+  .img{max-width:100%;border:1px solid #30363d;border-radius:6px;margin-top:10px}
+  .time{color:#8b949e;font-size:11px}
+</style>
+</head>
+<body>
+<h1>🖥️ Panel RAT — Live</h1>
+<div id="feed"></div>
+<script>
+async function refresh(){
+  const r = await fetch("panel.php").then(x=>x.json());
+  const feed = document.getElementById("feed");
+  feed.innerHTML = "";
+  r.reverse().forEach(m=>{
+    const div = document.createElement("div");
+    div.className = "msg";
+    div.innerHTML = `<div class="time">${new Date(m.timestamp).toLocaleString()}</div>${m.content||""}`;
+    if(m.attachments && m.attachments.length){
+      m.attachments.forEach(a=>{
+        if(/\.(png|jpg|jpeg)$/i.test(a.filename)){
+          const img=document.createElement("img");
+          img.src=a.url; img.className="img"; div.appendChild(img);
+        } else {
+          const link=document.createElement("a");
+          link.href=a.url; link.textContent="📎 "+a.filename; link.style.color="#58a6ff";
+          div.appendChild(document.createElement("br")); div.appendChild(link);
+        }
+      });
+    }
+    feed.appendChild(div);
+  });
+}
+refresh();
+setInterval(refresh, 5000);
+</script>
+</body>
+</html>
